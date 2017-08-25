@@ -107,6 +107,8 @@ function song(spotifySong) {
 	    if (err) throw err;
 	    // 
 		var song = data.tracks.items;
+		console.log('Top 5 choices:')
+		console.log('');
 		
 		    for (var i = 0; i < 5; i++){
 		    	for (j = 0; j < song[i].artists.length; j++){
@@ -114,6 +116,7 @@ function song(spotifySong) {
 		        	console.log('Song: ' + song[i].name);
 		        	console.log('Preview link of the song from Spotify: ' + song[i].preview_url);
 		        	console.log('Album: ' + song[i].album.name + "\n");
+		        	console.log('======================================================================')
 		    	}
 		    }
 	});
