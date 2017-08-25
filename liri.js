@@ -1,23 +1,66 @@
-// Linking twitter keys to this file
+// Linking twitter/spotify keys to this file
 var keys = require('./keys.js');
 var twitterKeys = keys.twitterKeys;
+var spotifyId = keys.spotifyId;
 
-
+//npm packages used 
+var inquirer = require("inquirer");
 var twitter = require('twitter');
 var spotify = require('node-spotify-api');
+var request = require('request');
 var fs = require('fs');
 
+// command input
 var input = process.argv[2];
 
 if (input === 'my-tweets') {
 	return tweets();
 }
 
+if (input === 'movie-this') {
+	inquirer.prompt([
+		{
+			type: 'input',
+			message: 'What movie would you like to search for?',
+			name: 'movieInput'
+		},
+		{
+			type: 'confirm',
+			message: 'Are you sure?',
+			name: 'confirm',
+			default: true
+		}
+	]).then(function(inquirerResponse){
+		if (inquirerResponse.confirm) {
+			movie(inquirerResponse.movieInput);
+		}
+	})
+}
+
+if (input === 'spotify-song') {
+	inquirer.prompt([
+		{
+			type: 'input',
+			message: 'What song would you like to search for?',
+			name: 'spotifySong'
+		},
+		{
+			type: 'confirm',
+			message: 'Are you sure?',
+			name: 'confirm',
+			default: true
+		}
+	]).then(function(inquirerResponse){
+		if (inquirerResponse.confirm) {
+			song(inquirerResponse.spotifySong);
+		}
+	})
+}
 
 
 // Retrieving the twitter keys from keys.js
 function tweets() {
-	var client = new twitter({
+	var keyInfo = new twitter({
 		consumer_key: twitterKeys.consumer_key,
 		consumer_secret: twitterKeys.consumer_secret,
 		access_token_key: twitterKeys.access_token_key,
@@ -32,26 +75,68 @@ function tweets() {
 	}
 
 
-	client.get('statuses/user_timeline', params, function(error, timeline, response){
-		if(!error){
+	keyInfo.get('statuses/user_timeline', params, function(error, timeline, response){
+		if(error){
+			console.log(error);
+		} else {
 			for(tweet in timeline){
-				
 				var date = new Date(timeline[tweet].created_at);
 
-			//This will display tweet info in bash
-				console.log('Tweet #: ' + (parseInt(tweet)+1) + ' ');
-				console.log(date.toString().slice(0, 24) + ' ');
-				console.log(timeline[tweet].text);
+				console.log('Tweet #: ' + (parseInt(tweet)+1));
+				console.log('Date/Time: ' + date.toString().slice(0, 24));
+				console.log('Tweet: ' + timeline[tweet].text);
 				console.log('======================================================================')
-				
-
-			//Add the info into the log.txt folder
-				fs.appendFile('log.txt', "Tweet #: " + (parseInt(tweet)+1) + "\n");
-				fs.appendFile('log.txt', timeline[tweet].text + "\n");
-				
-
+	
 			}
 		} 
 	})
 
 }
+
+function song(spotifySong) {
+	var spotifyInfo = new spotify({
+  		id: spotifyId.id,
+  		secret: spotifyId.secret
+	});
+
+// Using prompt to search for the song
+	spotifyInfo.search({ 
+		type: 'track', 
+		query: spotifySong
+	}, function(err, data) {
+	    if (err) throw err;
+	    // 
+		var song = data.tracks.items;
+		
+		    for (var i = 0; i < 10; i++){
+		    	for (j = 0; j < song[i].artists.length; j++){
+		    	    console.log('Artist: ' + song[i].artists[j].name);
+		        	console.log('Song: ' + song[i].name);
+		        	console.log('Preview link of the song from Spotify: ' + song[i].preview_url);
+		        	console.log('Album: ' + song[i].album.name + "\n");
+		    	}
+		    }
+	});
+}
+
+function movie(movieInput) {
+	request(' http://www.omdbapi.com/?i=tt3896198&apikey=be89988d?t='+ movieInput +'&y=&plot=short&tomatoes=true&r=json', function (error, response, body) {
+		if(error) throw error;
+		
+		json = JSON.parse(body);
+		
+		console.log(json.Title);
+		console.log('Year: ' + json.Year);
+		console.log('Rating(imdb): ' + json.imdbRating);
+		console.log('Rated: ' + json.Rated);
+		console.log('Country: ' + json.Country);
+		console.log('Language: ' + json.Language);
+		console.log('Director: ' + json.Director);
+		console.log('Actors: ' + json.Actors);
+		console.log('Plot: ' + json.Plot);
+		console.log('Rating(Rotten Tomatoes): ' + json.tomatoRating);
+		console.log('Rotten Tomatoes link: ' + json.tomatoURL);
+	})
+}
+
+
