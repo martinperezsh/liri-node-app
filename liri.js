@@ -108,7 +108,7 @@ function song(spotifySong) {
 	    // 
 		var song = data.tracks.items;
 		
-		    for (var i = 0; i < 10; i++){
+		    for (var i = 0; i < 5; i++){
 		    	for (j = 0; j < song[i].artists.length; j++){
 		    	    console.log('Artist: ' + song[i].artists[j].name);
 		        	console.log('Song: ' + song[i].name);
@@ -120,22 +120,20 @@ function song(spotifySong) {
 }
 
 function movie(movieInput) {
-	request(' http://www.omdbapi.com/?i=tt3896198&apikey=be89988d?t='+ movieInput +'&y=&plot=short&tomatoes=true&r=json', function (error, response, body) {
+	
+	request('http://www.omdbapi.com/?t=' + movieInput + '&y=&plot=short&apikey=40e9cece', function (error, response, body) {
 		if(error) throw error;
-		
+
 		json = JSON.parse(body);
 		
 		console.log(json.Title);
 		console.log('Year: ' + json.Year);
 		console.log('Rating(imdb): ' + json.imdbRating);
-		console.log('Rated: ' + json.Rated);
+		console.log('Rating(Rotten Tomatoes): ' + json.Ratings[1].Value);
 		console.log('Country: ' + json.Country);
 		console.log('Language: ' + json.Language);
-		console.log('Director: ' + json.Director);
-		console.log('Actors: ' + json.Actors);
 		console.log('Plot: ' + json.Plot);
-		console.log('Rating(Rotten Tomatoes): ' + json.tomatoRating);
-		console.log('Rotten Tomatoes link: ' + json.tomatoURL);
+		console.log('Actors: ' + json.Actors);
 	})
 }
 
